@@ -1,110 +1,180 @@
 import { useState, useEffect } from "react";
 import React from "react";
 
-const Home = () => {
-  const [inputValue, setInputValue] = useState("");
-  const [todos, setTodos] = useState([]);
+export function Home() {
+  const [list, setList] = useState([]);
+  const [input, setInput] = useState("");
+  const [count, setCount] = useState(0);
+  const API_URL = "https://assets.breatheco.de/apis/fake/todos/user/";
 
-  useEffect(() => {
-    fetch("https://playground.4geeks.com/apis/fake/todos/user/alesanchezr")
-      .then((resp) => resp.json())
-      .then((data) => {
-        setTodos(data);
+  const createUser = async () => {
+    const response = await fetch(API_URL + "CesarGorge", {
+      method: "POST",
+      body: JSON.stringify([]),
+      headers: { "Content-type": "application/json" },
+    })
+      .then((response) => {
+        console.log(response);
+        if (response.ok) {
+          return response.json();
+        }
+        new Error("Ocurrio un error en la solicitud");
       })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
-  const agregarTarea = () => {
-    if (inputValue) {
-      const nuevaTarea = { label: inputValue, done: false };
-      const nuevosTodos = [...todos, nuevaTarea];
-      setInputValue("");
-      setTodos(nuevosTodos);
+      .then((json) => console.log(json))
+      .catch((err) => console.log(err));
+  };
+
+  const deleteUser = async () => {
+    const response = await fetch(API_URL + "CesarGorge", {
+      method: "DELETE",
+      headers: { "Content-type": "application/json" },
+    })
+      .then((response) => {
+        console.log(response);
+        if (response.ok) {
+          response.json();
+          createUser();
+          setList([]);
+        }
+        new Error("Ocurrio un error al eliminar User");
+      })
+      .then((json) => console.log(json))
+      .catch((err) => console.log(err));
+  };
+
+  const createTask = () => {
+    const newTasks = [...list, { label: input, done: false }];
+    const request = fetch(API_URL + "CesarGorge", {
+      method: "PUT",
+      body: JSON.stringify(newTasks),
+      headers: { "Content-type": "application/json" },
+    })
+      .then((response) => {
+        console.log(response);
+        if (response.ok) {
+          return response.json();
+        }
+        new Error("Ocurrio un error en la creacion de la tarea");
+      })
+      .then((json) => console.log(json))
+      .catch((err) => console.log(err));
+    return request;
+  };
+  console.log();
+
+  const getTask = () => {
+    const request = fetch(API_URL + "CesarGorge")
+      .then((response) => {
+        console.log(response);
+        if (response.ok) {
+          return response.json();
+        }
+        new Error("Ocurrio un error al crear la tarea");
+      })
+      .then((json) => {
+        console.log(json);
+        setList(json);
+        return json;
+      })
+      .catch((err) => console.log(err));
+    return request;
+  };
+
+  const addTodo = async (todo) => {
+    const newTodo = {
+      done: false,
+      label: todo,
+      //id: Math.random(),
+      //todo: todo,
+    };
+
+    const taskCreation = await createTask();
+    //agregar todo a la lista
+    const update = await getTask();
+
+    //clear input box
+    setInput("");
+  };
+
+  const deleteTodo = async (i) => {
+    const newList = list.filter((todo, index) => index !== i);
+    if (newList.length == 0) {
+      await deleteUser();
+      setList([]);
+    } else {
+      const response = await fetch(API_URL + "CesarGorge", {
+        method: "PUT",
+        body: JSON.stringify(newList),
+        headers: { "Content-type": "application/json" },
+      })
+        .then((response) => {
+          console.log(response);
+          if (response.ok) {
+            return response.json();
+          }
+          new Error("Ocurrio un error en la creacion de la tarea");
+        })
+        .then((json) => {
+          console.log(json);
+          getTask();
+        })
+        .catch((err) => console.log(err));
     }
   };
 
   useEffect(() => {
-    actualizarServidor(todos);
-  }, [todos]);
-
-  const eliminarTarea = (indice) => {
-    const tareasActualizadas = todos.filter((_, i) => i !== indice);
-    setTodos(tareasActualizadas);
-  };
-
-  const eliminarTodasLasTareas = () => {
-    setTodos([]);
-  };
-
-  const actualizarServidor = (datos) => {
-    fetch("https://playground.4geeks.com/apis/fake/todos/user/alesanchezr", {
-      method: "PUT",
-      body: JSON.stringify(datos),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((resp) => {
-        console.log(resp.ok);
-        console.log(resp.status);
-        return resp.json();
-      })
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+    //createUser()
+    //createTask()
+    getTask();
+  }, []);
 
   return (
-    <div className="container" style={{ width: 400 }}>
-      <h1 style={{ color: "grey" }}>Tareas</h1>
+    <div className="text-center container">
+      <h1>todos</h1>
+      <input
+        type="text"
+        placeholder="What needs to be done?"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key == "Enter") {
+            addTodo(input, setCount(count + 1));
+          }
+        }}
+      />
+
       <ul>
-        <li>
-          <input
-            type="text"
-            style={{ outline: "none" }}
-            onChange={(e) => setInputValue(e.target.value)}
-            value={inputValue}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                agregarTarea();
-              }
-            }}
-            placeholder={
-              todos.length === 0
-                ? "No hay tareas, agrega una tarea."
-                : "por hacer"
-            }
-          ></input>
-        </li>
-        {todos.map((item, index) => (
-          <li
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-            key={index}
-          >
-            <span>{item.label}</span>
-            <i
-              className="far fa-minus-square"
-              style={{
-                color: "grey",
-              }}
-              onClick={() => eliminarTarea(index)}
-            ></i>
-          </li>
-        ))}
+        {list.map((todo, i) => {
+          return (
+            <li key={i}>
+              {todo.label}{" "}
+              <button
+                className="boton"
+                onClick={() => deleteTodo(i, setCount(count - 1))}
+              >
+                X
+              </button>
+            </li>
+          );
+        })}
       </ul>
-      <div style={{ fontSize: 12, color: "grey" }}>
-        {todos.length ? todos.length + " tarea(s) restante(s)" : ""}
+      <div className="contador">{count} item left </div>
+      <br />
+      <div>
+        <button
+          className="btn btn-danger"
+          onClick={(e) => {
+            deleteUser(),
+              setCount((num) => {
+                return (num = 0);
+              });
+          }}
+        >
+          Borrar todo
+        </button>
       </div>
-      <button onClick={eliminarTodasLasTareas}>Limpiar todas las tareas</button>
     </div>
   );
-};
+}
 
 export default Home;
