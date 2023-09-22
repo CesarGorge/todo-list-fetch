@@ -5,10 +5,10 @@ export function Home() {
   const [list, setList] = useState([]);
   const [input, setInput] = useState("");
   const [count, setCount] = useState(0);
-  const API_URL = "https://assets.breatheco.de/apis/fake/todos/user/";
+  const API_URL = "https://playground.4geeks.com/apis/fake/todos/user/";
 
   const createUser = async () => {
-    const response = await fetch(API_URL + "CesarGorge", {
+    const response = await fetch(API_URL + "usuario24", {
       method: "POST",
       body: JSON.stringify([]),
       headers: { "Content-type": "application/json" },
@@ -25,7 +25,7 @@ export function Home() {
   };
 
   const deleteUser = async () => {
-    const response = await fetch(API_URL + "CesarGorge", {
+    const response = await fetch(API_URL + "usuario24", {
       method: "DELETE",
       headers: { "Content-type": "application/json" },
     })
@@ -44,7 +44,7 @@ export function Home() {
 
   const createTask = () => {
     const newTasks = [...list, { label: input, done: false }];
-    const request = fetch(API_URL + "CesarGorge", {
+    const request = fetch(API_URL + "usuario24", {
       method: "PUT",
       body: JSON.stringify(newTasks),
       headers: { "Content-type": "application/json" },
@@ -63,7 +63,7 @@ export function Home() {
   console.log();
 
   const getTask = () => {
-    const request = fetch(API_URL + "CesarGorge")
+    const request = fetch(API_URL + "usuario24")
       .then((response) => {
         console.log(response);
         if (response.ok) {
@@ -102,7 +102,7 @@ export function Home() {
       await deleteUser();
       setList([]);
     } else {
-      const response = await fetch(API_URL + "CesarGorge", {
+      const response = await fetch(API_URL + "usuario24", {
         method: "PUT",
         body: JSON.stringify(newList),
         headers: { "Content-type": "application/json" },
@@ -143,17 +143,15 @@ export function Home() {
         }}
       />
 
-      <ul>
+      <ul style={{ listStyleType: "none" }}>
         {list.map((todo, i) => {
           return (
             <li key={i}>
               {todo.label}{" "}
-              <button
-                className="boton"
+              <i
                 onClick={() => deleteTodo(i, setCount(count - 1))}
-              >
-                X
-              </button>
+                className="far fa-minus-square"
+              ></i>
             </li>
           );
         })}
